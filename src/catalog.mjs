@@ -13,21 +13,39 @@ export const faultLabels={
 export const policyLabels={once:"一次调用",blind:"直接重发",reconcile:"先查回执"};
 export const toolLabels={get_stock:"查库存",quote_eta:"查到货时间",reserve_parts:"预留备件",get_receipt:"查回执"};
 export function clock(n){return String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0");}
+const cnDigits={"零":0,"一":1,"二":2,"两":2,"三":3,"四":4,"五":5,"六":6,"七":7,"八":8,"九":9};
+function numberOf(token){
+  if(/^\d+$/.test(token))return Number(token);
+  if(Object.hasOwn(cnDigits,token))return cnDigits[token];
+  const pieces=token.split("十");
+  if(pieces.length!==2)return NaN;
+  const tens=pieces[0]?cnDigits[pieces[0]]:1,ones=pieces[1]?cnDigits[pieces[1]]:0;
+  return tens*10+ones;
+}
 export function parse(text){
   if(typeof text!=="string"||!text.trim()||text.length>260)throw Error("请输入 1 至 260 字的现场需求。");
-  const intent=/不要预留|不(?:用|要)锁|只查|只看|库存有多少|查库存/.test(text)
-    ? (/到货|送达|能到|几点|何时/.test(text)?"eta":"stock")
-    : /预留|调拨|锁定|锁库存|留货/.test(text)?"reserve":/到货|送达|能到|几点|何时/.test(text)?"eta":/库存|有货/.test(text)?"stock":null;
+  const readOnly=/(?:别|禁止|不要|不用|暂不|不可|无需)\s*(?:再|先)?\s*(?:预留|锁(?:定|库存|货)?|调拨|留货|下单)|只(?:查|看|问)/.test(text);
+  const arrival=/到货|送达|能到|几点|何时|多久|时效/.test(text);
+  const stockQuery=/查(?:看)?[^，。？]{0,12}库存|只看[^，。？]{0,12}库存|有货|库存[^，。？]{0,4}(?:多少|查询)|库存$/.test(text);
+  const write=/预留|调拨|锁定|锁库存|留货|留\s*(?:[0-9一二两三四五六七八九十])/.test(text);
+  const intent=!readOnly&&write?"reserve":arrival?"eta":stockQuery?"stock":null;
   const skus=Object.entries(parts).filter(([id,p])=>text.toUpperCase().includes(id)||p.aliases.some(s=>text.includes(s))).map(([id])=>id);
   const cities=Object.entries(locations).filter(([,v])=>text.includes(v)).map(([id])=>id);
-  const counts=[...text.matchAll(/([0-9]+)\s*(?:块|个|件|台|只|片|套)/g)].map(a=>Number(a[1]));
-  const times=[...text.matchAll(/(?:^|[^\d])(\d{1,2})[:：](\d{2})(?!\d)/g)].map(a=>[Number(a[1]),Number(a[2])]);
+  const counts=[...text.matchAll(/([+-]?[0-9.]+|[零一二两三四五六七八九十]+)\s*(?:块|个|件|台|只|片|套)/g)].map(a=>numberOf(a[1]));
+  const times=[...text.matchAll(/(凌晨|早上|上午|中午|下午|晚上)?\s*([0-9]{1,3}|[零一二两三四五六七八九十]+)(?:[:：](\d{1,3})|[点时](半|[0-9]{1,3}|[零一二两三四五六七八九十]+)?分?)/g)].map(([,period,h,m1,m2])=>{
+    let hour=numberOf(h);
+    if(period&&(hour<1||hour>12))return [NaN,NaN];
+    if((period==="下午"||period==="晚上"||period==="中午")&&hour<12)hour+=12;
+    if((period==="凌晨"||period==="上午"||period==="早上")&&hour===12)hour=0;
+    return [hour,m2==="半"?30:numberOf(m1||m2||"0")];
+  });
   const issues=[];
   if(!intent)issues.push("请说明需要查库存、查询到货时间还是预留。");
   if(skus.length!==1)issues.push("请指定一种演示备件。");
   if(intent!=="stock"&&cities.length!==1)issues.push("请指定唯一目的地。");
-  if(intent!=="stock"&&(counts.length!==1||counts[0]<1||counts[0]>20))issues.push("请给出 1 至 20 件的数量。");
-  if(times.length>1 || times.some(([h,m])=>h>23||m>59))issues.push("请给出有效的单一截止时刻。");
+  if(intent!=="stock"&&(counts.length!==1||!Number.isInteger(counts[0])||counts[0]<1||counts[0]>20))issues.push("请给出 1 至 20 件的数量。");
+  if(times.length>1||times.some(([h,m])=>!Number.isInteger(h)||!Number.isInteger(m)||h>23||m>59))issues.push("请给出有效的单一截止时刻。");
+  if(/明天|后天|下周|昨天|大约|大概|稍后再|如果|除非/.test(text))issues.push("请确认今天单笔需求的数量、授权和时刻。");
   return {text,intent,sku:skus[0]??null,destination:cities[0]??null,quantity:counts[0]??null,
     deadline:times.length?times[0][0]*60+times[0][1]:1439,issues};
 }

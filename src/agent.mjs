@@ -9,7 +9,7 @@ export const options=z.strictObject({
 });
 export const resultNames={held:"已预留",stock:"已返回库存",eta:"已返回到货方案",clarify:"需要澄清",
  shortage:"库存不足",late:"赶不上截止时间",denied:"无预留权限",uncertain:"待人工核验",unavailable:"服务不可用",
- model_error:"模型未完成工具选择",bounded:"达到执行上限"};
+ not_held:"已核实未预留",model_error:"模型未完成工具选择",bounded:"达到执行上限"};
 const operation="WO-0187"; // Each isolated experiment has one business request, shared across all its attempts.
 
 function terminal(status,why,answer=null){return {status,why,answer};}
@@ -42,6 +42,7 @@ function after(s,tool,observed,config){
    if(tool.name==="get_receipt"){
      if(body.receipts.length===1)return terminal("held","按业务号查到 "+body.receipts[0].id+"，已确认写入",body.receipts[0]);
      if(body.receipts.length>1)return terminal("uncertain","发现多笔预留，需要人工核验");
+     if(s.retries>=budget)return terminal("not_held","权威回执为空，补发预算为零，本次没有预留");
      return retry("reserve_parts",s.lastWrite,"仓库确认尚无回执，用原幂等键重发",1);
    }
    return null;
