@@ -1,0 +1,417 @@
+{
+  "transport": "loopback TCP HTTP",
+  "requested": 2,
+  "rows": [
+    {
+      "fault": "after",
+      "policy": "new_key",
+      "status": "held",
+      "requests": 2,
+      "reserved": 4,
+      "receipts": 2,
+      "events": [
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-stable"
+          },
+          "status": 504,
+          "body": {
+            "error": "ack_timeout"
+          }
+        },
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-second"
+          },
+          "status": 201,
+          "body": {
+            "receipt": {
+              "id": "WH-002",
+              "operation": "ABL-1",
+              "key": "ABL-1-second",
+              "sku": "PWR-24",
+              "depot": "SZ",
+              "quantity": 2
+            },
+            "replayed": false
+          }
+        }
+      ]
+    },
+    {
+      "fault": "after",
+      "policy": "same_key",
+      "status": "held",
+      "requests": 2,
+      "reserved": 2,
+      "receipts": 1,
+      "events": [
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-stable"
+          },
+          "status": 504,
+          "body": {
+            "error": "ack_timeout"
+          }
+        },
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-stable"
+          },
+          "status": 200,
+          "body": {
+            "receipt": {
+              "id": "WH-001",
+              "operation": "ABL-1",
+              "key": "ABL-1-stable",
+              "sku": "PWR-24",
+              "depot": "SZ",
+              "quantity": 2
+            },
+            "replayed": true
+          }
+        }
+      ]
+    },
+    {
+      "fault": "after",
+      "policy": "receipt_then_same_key",
+      "status": "held",
+      "requests": 2,
+      "reserved": 2,
+      "receipts": 1,
+      "events": [
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-stable"
+          },
+          "status": 504,
+          "body": {
+            "error": "ack_timeout"
+          }
+        },
+        {
+          "name": "get_receipt",
+          "args": {
+            "operation": "ABL-1"
+          },
+          "status": 200,
+          "body": {
+            "operation": "ABL-1",
+            "receipts": [
+              {
+                "id": "WH-001",
+                "operation": "ABL-1",
+                "key": "ABL-1-stable",
+                "sku": "PWR-24",
+                "depot": "SZ",
+                "quantity": 2
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "fault": "before",
+      "policy": "new_key",
+      "status": "held",
+      "requests": 2,
+      "reserved": 2,
+      "receipts": 1,
+      "events": [
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-stable"
+          },
+          "status": 504,
+          "body": {
+            "error": "ack_timeout"
+          }
+        },
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-second"
+          },
+          "status": 201,
+          "body": {
+            "receipt": {
+              "id": "WH-001",
+              "operation": "ABL-1",
+              "key": "ABL-1-second",
+              "sku": "PWR-24",
+              "depot": "SZ",
+              "quantity": 2
+            },
+            "replayed": false
+          }
+        }
+      ]
+    },
+    {
+      "fault": "before",
+      "policy": "same_key",
+      "status": "held",
+      "requests": 2,
+      "reserved": 2,
+      "receipts": 1,
+      "events": [
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-stable"
+          },
+          "status": 504,
+          "body": {
+            "error": "ack_timeout"
+          }
+        },
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-stable"
+          },
+          "status": 201,
+          "body": {
+            "receipt": {
+              "id": "WH-001",
+              "operation": "ABL-1",
+              "key": "ABL-1-stable",
+              "sku": "PWR-24",
+              "depot": "SZ",
+              "quantity": 2
+            },
+            "replayed": false
+          }
+        }
+      ]
+    },
+    {
+      "fault": "before",
+      "policy": "receipt_then_same_key",
+      "status": "held",
+      "requests": 3,
+      "reserved": 2,
+      "receipts": 1,
+      "events": [
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-stable"
+          },
+          "status": 504,
+          "body": {
+            "error": "ack_timeout"
+          }
+        },
+        {
+          "name": "get_receipt",
+          "args": {
+            "operation": "ABL-1"
+          },
+          "status": 200,
+          "body": {
+            "operation": "ABL-1",
+            "receipts": []
+          }
+        },
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-stable"
+          },
+          "status": 201,
+          "body": {
+            "receipt": {
+              "id": "WH-001",
+              "operation": "ABL-1",
+              "key": "ABL-1-stable",
+              "sku": "PWR-24",
+              "depot": "SZ",
+              "quantity": 2
+            },
+            "replayed": false
+          }
+        }
+      ]
+    },
+    {
+      "fault": "dark",
+      "policy": "new_key",
+      "status": "held",
+      "requests": 2,
+      "reserved": 4,
+      "receipts": 2,
+      "events": [
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-stable"
+          },
+          "status": 504,
+          "body": {
+            "error": "ack_timeout"
+          }
+        },
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-second"
+          },
+          "status": 201,
+          "body": {
+            "receipt": {
+              "id": "WH-002",
+              "operation": "ABL-1",
+              "key": "ABL-1-second",
+              "sku": "PWR-24",
+              "depot": "SZ",
+              "quantity": 2
+            },
+            "replayed": false
+          }
+        }
+      ]
+    },
+    {
+      "fault": "dark",
+      "policy": "same_key",
+      "status": "held",
+      "requests": 2,
+      "reserved": 2,
+      "receipts": 1,
+      "events": [
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-stable"
+          },
+          "status": 504,
+          "body": {
+            "error": "ack_timeout"
+          }
+        },
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-stable"
+          },
+          "status": 200,
+          "body": {
+            "receipt": {
+              "id": "WH-001",
+              "operation": "ABL-1",
+              "key": "ABL-1-stable",
+              "sku": "PWR-24",
+              "depot": "SZ",
+              "quantity": 2
+            },
+            "replayed": true
+          }
+        }
+      ]
+    },
+    {
+      "fault": "dark",
+      "policy": "receipt_then_same_key",
+      "status": "uncertain",
+      "requests": 2,
+      "reserved": 2,
+      "receipts": 1,
+      "events": [
+        {
+          "name": "reserve_parts",
+          "args": {
+            "operation": "ABL-1",
+            "sku": "PWR-24",
+            "depot": "SZ",
+            "quantity": 2,
+            "key": "ABL-1-stable"
+          },
+          "status": 504,
+          "body": {
+            "error": "ack_timeout"
+          }
+        },
+        {
+          "name": "get_receipt",
+          "args": {
+            "operation": "ABL-1"
+          },
+          "status": 503,
+          "body": {
+            "error": "receipt_store_unavailable"
+          }
+        }
+      ]
+    }
+  ]
+}

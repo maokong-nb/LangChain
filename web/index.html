@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#182c35" />
+    <meta
+      name="description"
+      content="LangChain 备件调拨故障实验台。改变故障，逐步查看工具调用与库存实际扣减。"
+    />
+    <title>Dispatch Lab · 备件调拨实验台</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <header class="top">
+      <div class="wrap nav">
+        <a class="brand" href="#lab" aria-label="调拨实验台首页"
+          ><span class="mark" aria-hidden="true">↗</span> Dispatch Lab
+          <small>备件调拨</small></a
+        >
+        <nav aria-label="主导航">
+          <button data-tab="lab" aria-pressed="true">故障实验台</button
+          ><button data-tab="blind" aria-pressed="false">现场盲测</button
+          ><button data-tab="bench" aria-pressed="false">评测记录</button>
+        </nav>
+      </div>
+    </header>
+    <main class="wrap">
+      <section id="lab" class="view">
+        <div class="hero">
+          <div>
+            <div class="over"><span class="led"></span> LANGCHAIN TOOL LAB</div>
+            <h1>回执丢了，<br /><em>仓库到底留了几件？</em></h1>
+            <p>
+              对同一张工单注入故障，在三套独立的模拟库存上运行三种策略。拿仓库账本核对助手的答复。
+            </p>
+          </div>
+          <aside class="waybill">
+            <div class="ticketcap">调拨单 <b>WO-0187</b></div>
+            <div class="route">
+              <span>深圳仓</span><i></i><b>⇄</b><i></i><span>广州仓</span>
+            </div>
+            <div class="bars" aria-hidden="true"></div>
+            <div class="ticketcap"><span>出发时刻</span><b>14:00</b></div>
+          </aside>
+        </div>
+        <div class="workgrid">
+          <form id="dispatch" class="panel form-panel">
+            <div class="eyebrow">工单输入</div>
+            <h2>运行一次调拨</h2>
+            <label for="ticket">现场需求</label
+            ><textarea id="ticket" rows="3" maxlength="260" required>
+为深圳现场预留 2 块电源板，要求 16:00 前到货</textarea
+            >
+            <div id="examples" class="pills" aria-label="快捷需求"></div>
+            <label for="fault">注入故障</label
+            ><select id="fault"></select
+            ><label for="budget">重试预算</label
+            ><select id="budget">
+              <option value="0">0 次</option>
+              <option value="1">1 次</option>
+              <option value="2" selected>2 次</option>
+              <option value="3">3 次</option>
+            </select>
+            <button type="submit" id="run" class="primary">运行三种策略</button>
+            <p class="small" id="runtime"></p>
+            <p class="notice" role="status" id="notice"></p>
+          </form>
+          <div class="panel ledger">
+            <div class="eyebrow">业务验收</div>
+            <h2>仓库实际预留</h2>
+            <div class="context" id="case-context"></div>
+            <div id="cards" class="cards" aria-live="polite"></div>
+            <div class="foot">
+              <span>选中策略后，可查每一步工具调用。</span
+              ><button class="linkbutton" id="download" type="button">
+                导出本次 JSON
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="panel trace">
+          <div class="sectionhead">
+            <div>
+              <div class="eyebrow">执行明细</div>
+              <h2 id="traceheading">工具调用轨迹</h2>
+            </div>
+            <span class="code" id="tracestat"></span>
+          </div>
+          <p id="answer"></p>
+          <div class="tracegrid">
+            <div id="steps"></div>
+            <div class="inspector" id="inspect"></div>
+          </div>
+        </div>
+      </section>
+      <section id="blind" class="view" hidden>
+        <div class="intro">
+          <div class="over"><span class="led"></span> INTERVIEW CHALLENGE</div>
+          <h1>你接到一个 <em>504。</em></h1>
+          <p>
+            仓库可能已扣库存，也可能没收到请求。现在你是值班工程师，两种情况看到的响应完全一样。
+          </p>
+        </div>
+        <div class="workgrid">
+          <div class="panel form-panel">
+            <div class="eyebrow">当前观测</div>
+            <h2>预留 2 块电源板</h2>
+            <pre class="terminal">
+POST /reserve_parts
+HTTP 504
+{"error":"ack_timeout"}</pre
+            >
+            <p>下一步怎么处理？</p>
+            <div id="choices" class="choice">
+              <button data-pick="blind">直接再发一次</button
+              ><button data-pick="reconcile">按工单查回执</button
+              ><button data-pick="once">停止并转人工</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="eyebrow">核验结果</div>
+            <h2>打开仓库账本</h2>
+            <div id="blind-result" aria-live="polite">
+              <p>选定处理方式后，显示实际写入时机、预留数量与工具轨迹。</p>
+            </div>
+            <button id="again" class="linkbutton" hidden>再抽一张</button>
+          </div>
+        </div>
+      </section>
+      <section id="bench" class="view" hidden>
+        <div class="intro">
+          <div class="over"><span class="led"></span> REGRESSION RECORD</div>
+          <h1>一句“先别预留”，<br /><em>能不能挡住写入？</em></h1>
+          <p>
+            36
+            条人工标注工单，共用相同初始库存、故障和正确答案。点选案例，可在实验台重跑。
+          </p>
+        </div>
+        <div class="panel">
+          <div class="sectionhead">
+            <h2>从首版到当前版</h2>
+            <button id="report" class="linkbutton">导出完整评测</button>
+          </div>
+          <div id="benchSummary"></div>
+          <p class="small">
+            端到端通过要求最终答复与账本同时正确。HTTP
+            成功率以每次尝试为分母，包含主动注入的故障。时延是本机单轮测量，退避使用虚拟时钟。规则模式的模型
+            API 调用为 0。
+          </p>
+        </div>
+        <div class="panel">
+          <div class="sectionhead">
+            <h2>直接重试，沿用同一个键会怎样？</h2>
+            <label class="inline" for="counter"
+              >写入时机
+              <select id="counter">
+                <option value="after">写入后超时</option>
+                <option value="before">写入前超时</option>
+                <option value="dark">写入后回执服务离线</option>
+              </select></label
+            >
+          </div>
+          <p>
+            固定同一张 2
+            件工单，单独比较三种写入恢复方式。下表从第一次预留开始计数。
+          </p>
+          <div id="ablation"></div>
+        </div>
+        <div class="panel">
+          <div class="sectionhead">
+            <h2>逐题验收</h2>
+            <label class="inline" for="filter"
+              >筛选
+              <select id="filter">
+                <option value="all">全部案例</option>
+                <option value="regression">首版未通过</option>
+                <option value="blind">直接重发未通过</option>
+              </select></label
+            >
+          </div>
+          <div id="rows" class="case-list"></div>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <div class="wrap">
+        Dispatch Lab <span>双仓合成数据 · 当日单工单模拟</span
+        ><a href="https://github.com/maokong-nb/LangChain">GitHub 源码</a>
+      </div>
+    </footer>
+  </body>
+</html>

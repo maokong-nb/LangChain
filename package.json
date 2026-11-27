@@ -10,7 +10,9 @@
     "start": "node src/server.mjs",
     "test": "node --test test/*.test.mjs",
     "eval": "node bench/evaluate.mjs",
-    "build": "node scripts/build.mjs"
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/preview.mjs",
+    "eval:live": "node bench/live.mjs"
   },
   "dependencies": {
     "@langchain/core": "1.5.1",

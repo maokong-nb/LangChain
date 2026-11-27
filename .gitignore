@@ -4,3 +4,4 @@ dist/
 .env.*
 *.sqlite*
 *.log
+live-results.json
